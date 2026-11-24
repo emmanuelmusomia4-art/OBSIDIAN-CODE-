@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="fr" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OBSIDIAN CODE — Solutions Numériques & IA à Matadi</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Orbitron:wght@600;700;800&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Orbitron', 'sans-serif'],
+          },
+          colors: {
+            obsidian: {
+              950: '#040811',
+              900: '#070f1d',
+              800: '#0c182c',
+              700: '#132542',
+            },
+            cyber: {
+              400: '#22d3ee',
+              500: '#06b6d4',
+              600: '#0891b2',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #040811;
+      color: #e2e8f0;
+    }
+
+    .bg-grid-pattern {
+      background-image: 
+        linear-gradient(to right, rgba(34, 211, 238, 0.06) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(34, 211, 238, 0.06) 1px, transparent 1px);
+      background-size: 28px 28px;
+    }
+
+    .cyber-card {
+      background: linear-gradient(145deg, rgba(12, 24, 44, 0.92), rgba(7, 15, 29, 0.96));
+      border: 1px solid rgba(34, 211, 238, 0.18);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+    }
+
+    .cyber-card:hover {
+      border-color: rgba(34, 211, 238, 0.42);
+    }
+
+    .cyber-glow {
+      box-shadow: 0 0 24px rgba(34, 211, 238, 0.25);
+    }
+
+    @keyframes pulseGlow {
+      0%, 100% { transform: scale(1); filter: drop-shadow(0 0 12px rgba(34, 211, 238, 0.45)); }
+      50% { transform: scale(1.04); filter: drop-shadow(0 0 22px rgba(34, 211, 238, 0.75)); }
+    }
+
+    .logo-pulse {
+      animation: pulseGlow 4s ease-in-out infinite;
+    }
+
+    @keyframes orbitSpin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .orbit-ring {
+      animation: orbitSpin 28s linear infinite;
+    }
+  </style>
+</head>
+<body class="antialiased selection:bg-cyber-500 selection:text-obsidian-950">
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed bottom-5 left-4 right-4 sm:left-auto sm:right-6 sm:w-96 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none">
+    <div class="bg-obsidian-800 border border-cyber-400/50 text-slate-100 px-4 py-3.5 rounded-xl shadow-2xl flex items-center gap-3">
+      <div class="w-7 h-7 rounded-full bg-cyber-500/20 border border-cyber-400/40 flex items-center justify-center shrink-0 text-cyber-400">
+        <i data-lucide="check" class="w-4 h-4"></i>
+      </div>
+      <p id="toastMessage" class="text-sm font-medium leading-snug"></p>
+    </div>
+  </div>
+
+  <!-- En-tête / Navigation -->
+  <header class="sticky top-0 z-40 bg-obsidian-950/90 backdrop-blur-md border-b border-cyber-400/15">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-2">
+      <!-- Logo -->
+      <a href="#" class="flex items-center gap-2.5 group">
+        <div class="w-10 h-10 rounded-xl bg-obsidian-800 border border-cyber-400/50 flex items-center justify-center shadow-inner group-hover:border-cyber-400 transition">
+          <span class="font-display font-extrabold text-sm tracking-wider text-cyber-400">OC</span>
+        </div>
+        <div class="leading-tight">
+          <div class="font-display font-bold text-sm sm:text-base tracking-wider text-white">
+            OBSIDIAN <span class="text-cyber-400">CODE</span>
+          </div>
+          <div class="text-[11px] text-slate-400">Matadi • Kongo Central</div>
+        </div>
+      </a>
+
+      <!-- Actions Header -->
+      <div class="flex items-center gap-2">
+        <a href="#contact" class="inline-flex items-center gap-2 bg-cyber-400 hover:bg-cyan-300 text-obsidian-950 font-bold text-xs sm:text-sm px-3.5 py-2 rounded-xl transition shadow-lg shadow-cyber-500/20">
+          <span>Demander un devis</span>
+          <span id="headerCartBadge" class="hidden bg-obsidian-950 text-cyber-400 text-xs font-extrabold w-5 h-5 rounded-full items-center justify-center">0</span>
+        </a>
+        <button id="menuBtn" aria-label="Menu" class="p-2.5 rounded-xl bg-obsidian-800 border border-slate-700/80 text-slate-200 hover:border-cyber-400/50 transition">
+          <i data-lucide="menu" class="w-5 h-5"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Menu Mobile Déroulant -->
+    <nav id="mobileMenu" class="hidden border-t border-cyber-400/15 bg-obsidian-900 px-4 py-4 space-y-2">
+      <a href="#accueil" class="block px-3 py-2 rounded-lg text-sm font-medium text-slate-200 hover:bg-obsidian-800 hover:text-cyber-400">Accueil</a>
+      <a href="#services" class="block px-3 py-2 rounded-lg text-sm font-medium text-slate-200 hover:bg-obsidian-800 hover:text-cyber-400">Catalogue & Tarifs</a>
+      <a href="#simulateur" class="block px-3 py-2 rounded-lg text-sm font-medium text-slate-200 hover:bg-obsidian-800 hover:text-cyber-400">Simulateur de Devis (USD)</a>
+      <a href="#contact" class="block px-3 py-2 rounded-lg text-sm font-medium text-slate-200 hover:bg-obsidian-800 hover:text-cyber-400">Fiche d'Intervention & Contact</a>
+    </nav>
+  </header>
+
+  <!-- Section Hero -->
+  <section id="accueil" class="relative overflow-hidden bg-grid-pattern pt-8 pb-14 px-4">
+    <div class="max-w-5xl mx-auto">
+      <!-- Badge localisation -->
+      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-obsidian-800/90 border border-cyber-400/30 text-cyber-400 text-xs font-medium mb-6">
+        <span class="w-2 h-2 rounded-full bg-cyber-400 animate-ping"></span>
+        <span>Entreprise Numérique • Matadi, Kongo Central (RDC)</span>
+      </div>
+
+      <!-- Titre Principal -->
+      <h1 class="font-display text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-white mb-4">
+        OBSIDIAN <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyber-400 to-cyan-200">CODE</span>
+      </h1>
+
+      <p class="text-lg sm:text-xl font-semibold text-cyber-400 mb-4">
+        « L'informatique et l'IA au service des besoins de tous. »
+      </p>
+
+      <p class="text-slate-300 text-base sm:text-lg leading-relaxed max-w-2xl mb-8">
+        Nous accompagnons les particuliers, écoles, PME, commerces et associations de Matadi dans la maîtrise, l'entretien et la modernisation de leurs outils numériques — avec une devise simple :
+        <strong class="text-white">« Comprendre le besoin, apporter la solution. »</strong>
+      </p>
+
+      <!-- Boutons CTA -->
+      <div class="flex flex-col sm:flex-row gap-3.5 mb-10">
+        <a href="#services" class="inline-flex items-center justify-center gap-2 bg-cyber-400 hover:bg-cyan-300 text-obsidian-950 font-bold px-6 py-3.5 rounded-xl transition cyber-glow">
+          <span>Explorer nos services</span>
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+        </a>
+        <a href="#simulateur" class="inline-flex items-center justify-center gap-2 bg-obsidian-800/90 hover:bg-obsidian-700 text-white font-semibold px-6 py-3.5 rounded-xl border border-cyber-400/35 transition">
+          <i data-lucide="calculator" class="w-4 h-4 text-cyber-400"></i>
+          <span>Simuler un devis en USD</span>
+        </a>
+      </div>
+
+      <!-- 3 Cartes Points Clés -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
+        <div class="cyber-card p-5 rounded-2xl">
+          <div class="flex items-center gap-2.5 text-cyber-400 font-bold text-base mb-1.5">
+            <i data-lucide="map-pin" class="w-5 h-5"></i>
+            <span>Matadi & Kongo Central</span>
+          </div>
+          <p class="text-sm text-slate-400">Proximité locale, interventions au bureau, ou sur site</p>
+        </div>
+
+        <div class="cyber-card p-5 rounded-2xl">
+          <div class="flex items-center gap-2.5 text-cyber-400 font-bold text-base mb-1.5">
+            <i data-lucide="layers" class="w-5 h-5"></i>
+            <span>8 Prestations ciblées</span>
+          </div>
+          <p class="text-sm text-slate-400">Maintenance, réseaux, web, bureautique, sécurité & IA</p>
+        </div>
+
+        <div class="cyber-card p-5 rounded-2xl">
+          <div class="flex items-center gap-2.5 text-cyber-400 font-bold text-base mb-1.5">
+            <i data-lucide="shield-check" class="w-5 h-5"></i>
+            <span>100 % Transparent</span>
+          </div>
+          <p class="text-sm text-slate-400">Diagnostic préalable et devis clair avant toute action</p>
+        </div>
+      </div>
+
+      <!-- Visuel Emblème Technologique OC -->
+      <div class="cyber-card bg-grid-pattern rounded-3xl p-8 sm:p-10 text-center relative overflow-hidden">
+        <div class="relative w-52 h-52 mx-auto flex items-center justify-center mb-5">
+          <!-- Anneau rotatif -->
+          <div class="absolute inset-2 rounded-full border border-dashed border-cyber-400/35 orbit-ring"></div>
+          <div class="absolute inset-7 rounded-full border border-cyber-400/20"></div>
+
+          <!-- Petits nœuds autour -->
+          <span class="absolute top-2 left-1/2 -translate-x-1/2 w-6 h-6 rounded-full bg-obsidian-800 border border-cyber-400/60 flex items-center justify-center text-cyber-400"><i data-lucide="cpu" class="w-3 h-3"></i></span>
+          <span class="absolute bottom-2 left-1/2 -translate-x-1/2 w-6 h-6 rounded-full bg-obsidian-800 border border-cyber-400/60 flex items-center justify-center text-cyber-400"><i data-lucide="globe" class="w-3 h-3"></i></span>
+          <span class="absolute left-2 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-obsidian-800 border border-cyber-400/60 flex items-center justify-center text-cyber-400"><i data-lucide="wifi" class="w-3 h-3"></i></span>
+          <span class="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-obsidian-800 border border-cyber-400/60 flex items-center justify-center text-cyber-400"><i data-lucide="bot" class="w-3 h-3"></i></span>
+
+          <!-- Cœur OC -->
+          <div class="w-24 h-24 rounded-2xl rotate-45 bg-gradient-to-br from-obsidian-700 to-obsidian-950 border-2 border-cyber-400 flex items-center justify-center logo-pulse">
+            <span class="-rotate-45 font-display text-3xl font-extrabold text-cyber-400 tracking-wider">OC</span>
+          </div>
+        </div>
+
+        <h2 class="font-display text-xl sm:text-2xl font-extrabold tracking-widest text-white mb-1">OBSIDIAN CODE</h2>
+        <p class="text-xs sm:text-sm text-slate-400">L'informatique et l'IA au service des besoins de tous.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section Catalogue & Tarifs -->
+  <section id="services" class="py-14 px-4 border-t border-cyber-400/10">
+    <div class="max-w-5xl mx-auto">
+      <div class="text-center max-w-2xl mx-auto mb-8">
+        <span class="text-xs font-bold uppercase tracking-widest text-cyber-400">CATALOGUE & TARIFS TRANSPARENTS</span>
+        <h2 class="text-2xl sm:text-4xl font-extrabold text-white mt-2 mb-3">Nos Prestations Numériques à Matadi</h2>
+        <p class="text-sm sm:text-base text-slate-400">
+          Des tarifs clairs annoncés avant toute intervention. Cliquez sur <strong class="text-slate-200">« Ajouter au devis »</strong> pour composer votre estimation instantanée.
+        </p>
+      </div>
+
+      <!-- Filtres Catégories -->
+      <div id="categoryFilters" class="flex flex-wrap items-center justify-center gap-2 mb-8">
+        <button data-filter="all" class="filter-btn active px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-cyber-400 text-obsidian-950 transition">Tout le catalogue</button>
+        <button data-filter="Assistance & Maintenance" class="filter-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-obsidian-800 text-slate-300 border border-slate-700 hover:border-cyber-400/50 transition">Assistance & Maintenance</button>
+        <button data-filter="Réseaux & Sécurité" class="filter-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-obsidian-800 text-slate-300 border border-slate-700 hover:border-cyber-400/50 transition">Réseaux & Sécurité</button>
+        <button data-filter="Web & IA" class="filter-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-obsidian-800 text-slate-300 border border-slate-700 hover:border-cyber-400/50 transition">Web & IA</button>
+        <button data-filter="Formation" class="filter-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-obsidian-800 text-slate-300 border border-slate-700 hover:border-cyber-400/50 transition">Formation</button>
+      </div>
+
+      <!-- Grille des Prestations -->
+      <div id="servicesGrid" class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8">
+        <!-- Généré dynamiquement en JS -->
+      </div>
+
+      <!-- Encadré légal / partenaires -->
+      <div class="cyber-card rounded-2xl p-5 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <p class="text-xs sm:text-sm text-slate-400 leading-relaxed">
+          Les réparations électroniques complexes (micro-soudure, cartes mères) et la récupération de données à haut risque sont confiées à des partenaires spécialisés qualifiés. Tous nos déplacements utilisent des <strong class="text-slate-200">logiciels et licences légaux</strong>.
+        </p>
+        <a href="#simulateur" class="shrink-0 inline-flex items-center gap-2 bg-obsidian-700 hover:bg-obsidian-800 text-cyber-400 border border-cyber-400/40 font-semibold text-xs sm:text-sm px-4 py-2.5 rounded-xl transition">
+          <span>Voir mon devis</span>
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section Simulateur de Devis -->
+  <section id="simulateur" class="py-14 px-4 bg-obsidian-900/50 border-t border-cyber-400/10">
+    <div class="max-w-5xl mx-auto">
+      <div class="text-center max-w-2xl mx-auto mb-8">
+        <span class="text-xs font-bold uppercase tracking-widest text-cyber-400">OUTIL INTERACTIF</span>
+        <h2 class="text-2xl sm:text-4xl font-extrabold text-white mt-2 mb-2">Simulateur de Devis Instantané (USD)</h2>
+        <p class="text-sm text-slate-400">Sélectionnez votre profil et ajustez les quantités</p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <!-- Colonne Gauche : Sélection Profil + Quantités -->
+        <div class="lg:col-span-7 space-y-4">
+          <div class="cyber-card rounded-2xl p-4 sm:p-5">
+            <label for="simClientType" class="block text-xs font-bold uppercase tracking-wider text-cyber-400 mb-2">Profil du client</label>
+            <select id="simClientType" class="w-full bg-obsidian-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-cyber-400">
+              <option value="Particulier">Particulier</option>
+              <option value="École / Association">École / Association</option>
+              <option value="PME / Commerce">PME / Commerce</option>
+            </select>
+          </div>
+
+          <div id="simulatorItems" class="space-y-3">
+            <!-- Généré dynamiquement en JS -->
+          </div>
+        </div>
+
+        <!-- Colonne Droite : Ticket Devis Estimatif -->
+        <div class="lg:col-span-5 cyber-card rounded-2xl p-5 sm:p-6 sticky top-20">
+          <div class="flex items-start justify-between gap-2 pb-4 border-b border-slate-700/80">
+            <div>
+              <span class="text-[11px] font-bold uppercase tracking-widest text-cyber-400">DEVIS ESTIMATIF</span>
+              <h3 class="font-display text-lg font-extrabold text-white">OBSIDIAN CODE</h3>
+            </div>
+            <span class="px-2.5 py-1 rounded-lg bg-cyber-500/15 border border-cyber-400/35 text-cyber-400 text-xs font-semibold">
+              Valable 15 jours
+            </span>
+          </div>
+
+          <div class="flex items-center justify-between text-xs text-slate-400 py-3 border-b border-slate-800">
+            <span>Client : <strong id="quoteClientLabel" class="text-slate-200">Particulier</strong></span>
+            <span>Siège : <strong class="text-slate-200">Matadi, RDC</strong></span>
+          </div>
+
+          <!-- Liste des articles choisis -->
+          <div id="quoteSummaryList" class="py-4 space-y-3 min-h-[110px]">
+            <p class="text-sm text-slate-500 italic text-center py-6">Aucune prestation sélectionnée. Ajoutez un service ci-contre.</p>
+          </div>
+
+          <!-- Total -->
+          <div class="bg-obsidian-950/90 border border-cyber-400/25 rounded-xl p-4 flex items-center justify-between mb-4">
+            <span class="text-sm font-semibold text-slate-300">Total estimé (HT / indicatif)</span>
+            <span id="quoteTotalAmount" class="font-display text-2xl font-extrabold text-cyber-400">0 USD</span>
+          </div>
+
+          <p class="text-[11px] text-slate-400 leading-relaxed mb-5">
+            Conditions : devis valable 15 jours ; intervention après acceptation écrite ; pièces matérielles, licences payantes, hébergement et nom de domaine facturés séparément après accord.
+          </p>
+
+          <div class="space-y-2.5">
+            <button id="copyQuoteBtn" type="button" class="w-full inline-flex items-center justify-center gap-2 bg-obsidian-800 hover:bg-obsidian-700 text-white font-semibold text-sm py-3 px-4 rounded-xl border border-slate-600 transition">
+              <i data-lucide="copy" class="w-4 h-4 text-cyber-400"></i>
+              <span>Copier le devis</span>
+            </button>
+            <button id="transferQuoteBtn" type="button" class="w-full inline-flex items-center justify-center gap-2 bg-cyber-400 hover:bg-cyan-300 text-obsidian-950 font-bold text-sm py-3 px-4 rounded-xl transition cyber-glow">
+              <span>Envoyer la demande</span>
+              <i data-lucide="arrow-right" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section Fiche d'Intervention & Envoi Mail / WhatsApp -->
+  <section id="contact" class="py-14 px-4 border-t border-cyber-400/10">
+    <div class="max-w-4xl mx-auto">
+      <div class="text-center max-w-2xl mx-auto mb-8">
+        <span class="text-xs font-bold uppercase tracking-widest text-cyber-400">APPROCHE ORIENTÉE BESOINS</span>
+        <h2 class="text-2xl sm:text-4xl font-extrabold text-white mt-2 mb-3">Ouvrir une Fiche d'Intervention</h2>
+        <p class="text-sm sm:text-base text-slate-400">
+          Décrivez-nous votre besoin informatique, réseau, web ou formation. Notre équipe analyse votre demande et vous répond avec une proposition claire.
+        </p>
+      </div>
+
+      <!-- 3 Blocs Info -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div class="cyber-card rounded-2xl p-4">
+          <div class="flex items-center gap-2 text-cyber-400 font-bold text-sm mb-1">
+            <i data-lucide="building-2" class="w-4 h-4"></i>
+            <span>Siège & Zone d'intervention</span>
+          </div>
+          <p class="text-xs text-slate-400 leading-relaxed">Matadi, Province du Kongo Central — République démocratique du Congo (et localités voisines sur mission).</p>
+        </div>
+
+        <div class="cyber-card rounded-2xl p-4">
+          <div class="flex items-center gap-2 text-cyber-400 font-bold text-sm mb-1">
+            <i data-lucide="monitor-smartphone" class="w-4 h-4"></i>
+            <span>Espaces dédiés</span>
+          </div>
+          <p class="text-xs text-slate-400 leading-relaxed">Accueil client, atelier technique de diagnostic, espace développement web & formation.</p>
+        </div>
+
+        <div class="cyber-card rounded-2xl p-4">
+          <div class="flex items-center gap-2 text-cyber-400 font-bold text-sm mb-1">
+            <i data-lucide="lock" class="w-4 h-4"></i>
+            <span>Protection des données</span>
+          </div>
+          <p class="text-xs text-slate-400 leading-relaxed">Aucun accès à vos appareils ou fichiers sans votre autorisation explicite sur la fiche client.</p>
+        </div>
+      </div>
+
+      <!-- Formulaire Fiche d'Intervention -->
+      <div id="formContainer" class="cyber-card rounded-3xl p-6 sm:p-8">
+        <form id="interventionForm" class="space-y-5">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label for="clientType" class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2">Type de client *</label>
+              <select id="clientType" required class="w-full bg-obsidian-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-cyber-400">
+                <option value="Particulier">Particulier</option>
+                <option value="École / Association">École / Association</option>
+                <option value="PME / Commerce">PME / Commerce</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="clientName" class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2">Nom complet ou structure *</label>
+              <input type="text" id="clientName" required placeholder="Ex. Institut Mvuadu / Jean K." class="w-full bg-obsidian-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyber-400" />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label for="clientPhone" class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2">Téléphone / WhatsApp *</label>
+              <input type="tel" id="clientPhone" required placeholder="Ex. +243 8X XXX XXXX" class="w-full bg-obsidian-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyber-400" />
+            </div>
+
+            <div>
+              <label for="clientEmail" class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2">Votre E-mail (optionnel)</label>
+              <input type="email" id="clientEmail" placeholder="Ex. client@gmail.com" class="w-full bg-obsidian-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyber-400" />
+            </div>
+          </div>
+
+          <div>
+            <label for="serviceRequested" class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2">Service souhaité *</label>
+            <select id="serviceRequested" required class="w-full bg-obsidian-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-cyber-400">
+              <option value="Diagnostic & Maintenance informatique">Diagnostic & Maintenance informatique</option>
+              <option value="Installation logicielle">Installation logicielle</option>
+              <option value="Configuration Wi-Fi & réseau">Configuration Wi-Fi & réseau</option>
+              <option value="Conseil sécurité & sauvegarde">Conseil sécurité & sauvegarde</option>
+              <option value="Site vitrine simple">Site vitrine simple</option>
+              <option value="Solutions IA & outils de gestion">Solutions IA & outils de gestion</option>
+              <option value="Formation bureautique">Formation bureautique</option>
+              <option value="Devis personnalisé (plusieurs services)">Devis personnalisé (plusieurs services)</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="projectDetails" class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2">Description du besoin & récapitulatif éventuel *</label>
+            <textarea id="projectDetails" rows="6" required placeholder="Décrivez votre besoin, le matériel concerné ou le devis estimatif..." class="w-full bg-obsidian-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyber-400"></textarea>
+          </div>
+
+          <label class="flex items-start gap-3 cursor-pointer select-none">
+            <input type="checkbox" id="consentCheck" required class="mt-1 w-4 h-4 rounded border-slate-600 bg-obsidian-950 text-cyber-400 focus:ring-cyber-400" />
+            <span class="text-xs text-slate-400 leading-relaxed">
+              J'accepte l'ouverture d'une fiche de diagnostic préalable et je confirme que les informations transmises sont exactes (aucune intervention payante n'est engagée sans validation écrite du devis).
+            </span>
+          </label>
+
+          <!-- Boutons d'envoi réparés -->
+          <div class="pt-2 flex flex-col sm:flex-row gap-3">
+            <button type="submit" class="flex-1 inline-flex items-center justify-center gap-2 bg-cyber-400 hover:bg-cyan-300 text-obsidian-950 font-extrabold text-sm py-3.5 px-5 rounded-xl transition cyber-glow">
+              <i data-lucide="mail" class="w-4 h-4"></i>
+              <span>Enregistrer & Envoyer par E-mail</span>
+            </button>
+
+            <button type="button" id="directWhatsappBtn" class="sm:w-auto inline-flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-obsidian-950 font-bold text-sm py-3.5 px-5 rounded-xl transition">
+              <i data-lucide="message-circle" class="w-4 h-4"></i>
+              <span>Envoyer sur WhatsApp</span>
+            </button>
+          </div>
+        </form>
+
+        <!-- Carte de Confirmation après envoi -->
+        <div id="confirmationCard" class="hidden text-center py-6 space-y-4">
+          <div class="w-14 h-14 rounded-2xl bg-cyber-500/20 border border-cyber-400 flex items-center justify-center mx-auto text-cyber-400">
+            <i data-lucide="check-circle-2" class="w-8 h-8"></i>
+          </div>
+          <div class="inline-block px-3 py-1 rounded-full bg-obsidian-950 border border-cyber-400/40 text-xs font-mono text-cyber-400" id="ticketRefBadge">
+            Référence : OC-0000
+          </div>
+          <h3 class="text-xl font-bold text-white">Demande d'intervention enregistrée !</h3>
+          <p id="confirmationSummary" class="text-sm text-slate-300 max-w-lg mx-auto leading-relaxed"></p>
+
+          <div class="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+            <a id="retryMailLink" href="#" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-cyber-400 hover:bg-cyan-300 text-obsidian-950 font-bold text-sm px-5 py-3 rounded-xl transition">
+              <i data-lucide="mail" class="w-4 h-4"></i>
+              <span>Ouvrir l'E-mail à nouveau</span>
+            </a>
+            <a id="retryWhatsappLink" href="#" target="_blank" rel="noopener noreferrer" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-obsidian-950 font-bold text-sm px-5 py-3 rounded-xl transition">
+              <i data-lucide="message-circle" class="w-4 h-4"></i>
+              <span>Envoyer via WhatsApp</span>
+            </a>
+            <button type="button" id="newRequestBtn" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-obsidian-800 hover:bg-obsidian-700 text-slate-200 font-semibold text-sm px-5 py-3 rounded-xl border border-slate-600 transition">
+              <span>Nouvelle demande</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pied de page -->
+  <footer class="bg-obsidian-950 border-t border-cyber-400/15 py-10 px-4 text-center">
+    <div class="max-w-4xl mx-auto space-y-4">
+      <div class="font-display text-lg font-extrabold tracking-wider text-white">
+        OBSIDIAN <span class="text-cyber-400">CODE</span>
+      </div>
+      <p class="text-xs text-slate-400">
+        « L'informatique et l'IA au service des besoins de tous. » • Devise : « Comprendre le besoin, apporter la solution. »
+      </p>
+      <div class="flex flex-wrap justify-center gap-5 text-xs font-medium text-slate-300 pt-1">
+        <a href="#accueil" class="hover:text-cyber-400 transition">Accueil</a>
+        <a href="#services" class="hover:text-cyber-400 transition">Services</a>
+        <a href="#simulateur" class="hover:text-cyber-400 transition">Devis</a>
+        <a href="#contact" class="hover:text-cyber-400 transition">Contact</a>
+      </div>
+      <p class="text-[11px] text-slate-500 pt-3">
+        © 2026 OBSIDIAN CODE — Matadi, Kongo Central, République démocratique du Congo. Tous droits réservés.
+      </p>
+    </div>
+  </footer>
+
+  <script>
+    // =========================================================
+    // CONFIGURATION CONTACT OBSIDIAN CODE (MODIFIABLE ICI)
+    // =========================================================
+    const OBSIDIAN_EMAIL = "Obsidiancode432@gmail.com";
+    const OBSIDIAN_WHATSAPP = "243998339948"; // Format international sans '+'
+
+    // Catalogue des prestations
+    const servicesData = [
+      {
+        id: "diag",
+        category: "Assistance & Maintenance",
+        title: "Diagnostic informatique",
+        price: 10,
+        description: "Analyse complète matérielle et logicielle pour identifier l'origine d'une panne, d'une lenteur ou d'un dysfonctionnement.",
+        unitNote: "par diagnostic (Diagnostic seul avant devis)",
+        shortNote: "Diagnostic seul avant devis"
+      },
+      {
+        id: "soft",
+        category: "Assistance & Maintenance",
+        title: "Installation logicielle",
+        price: 15,
+        description: "Installation propre et paramétrage de vos suites bureautiques, navigateurs et logiciels métiers autorisés.",
+        unitNote: "par poste (Licence payante non comprise)",
+        shortNote: "Licence payante non comprise"
+      },
+      {
+        id: "maint",
+        category: "Assistance & Maintenance",
+        title: "Maintenance simple",
+        price: 25,
+        description: "Nettoyage système, mises à jour de sécurité, optimisation des performances et contrôle de stabilité.",
+        unitNote: "par ordinateur (Hors pièces matérielles)",
+        shortNote: "Hors pièces matérielles"
+      },
+      {
+        id: "wifi",
+        category: "Réseaux & Sécurité",
+        title: "Configuration Wi-Fi & réseau",
+        price: 30,
+        description: "Paramétrage de routeur, sécurisation du réseau sans fil et partage de connexion entre plusieurs bureaux.",
+        unitNote: "par installation (Routeur et abonnement séparés)",
+        shortNote: "Routeur et abonnement séparés"
+      },
+      {
+        id: "sec",
+        category: "Réseaux & Sécurité",
+        title: "Conseil sécurité & sauvegarde",
+        price: 25,
+        description: "Mise en place de plans de sauvegarde, gestion des mots de passe robustes et contrôle des accès aux dossiers sensibles.",
+        unitNote: "par pack (Support externe non compris)",
+        shortNote: "Support externe non compris"
+      },
+      {
+        id: "web",
+        category: "Web & IA",
+        title: "Site vitrine simple",
+        price: 250,
+        description: "Conception d'un site web moderne, responsive et clair pour valoriser votre activité ou commerce à Matadi.",
+        unitNote: "par site (Hébergement et domaine séparés)",
+        shortNote: "Hébergement et domaine séparés"
+      },
+      {
+        id: "ia",
+        category: "Web & IA",
+        title: "Solutions IA & outils de gestion",
+        price: 40,
+        description: "Création de formulaires, tableaux de suivi et assistants IA encadrés pour la rédaction et le classement documentaire.",
+        unitNote: "par module (Contrôle humain et confidentialité)",
+        shortNote: "Contrôle humain et confidentialité"
+      },
+      {
+        id: "form",
+        category: "Formation",
+        title: "Formation bureautique",
+        price: 20,
+        description: "Initiation pratique à Word, Excel, classement numérique des fichiers et bonnes pratiques de sécurité.",
+        unitNote: "par séance (Séance de durée convenue)",
+        shortNote: "Séance de durée convenue"
+      }
+    ];
+
+    // Panier du simulateur : { id: quantite }
+    const cart = {};
+    servicesData.forEach(s => cart[s.id] = 0);
+
+    // Toast helper
+    let toastTimeout;
+    function showToast(msg) {
+      const toast = document.getElementById("toast");
+      const toastMsg = document.getElementById("toastMessage");
+      toastMsg.textContent = msg;
+      toast.classList.remove("translate-y-24", "opacity-0");
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        toast.classList.add("translate-y-24", "opacity-0");
+      }, 3000);
+    }
+
+    // Menu mobile
+    document.getElementById("menuBtn").addEventListener("click", () => {
+      document.getElementById("mobileMenu").classList.toggle("hidden");
+    });
+    document.querySelectorAll("#mobileMenu a").forEach(link => {
+      link.addEventListener("click", () => {
+        document.getElementById("mobileMenu").classList.add("hidden");
+      });
+    });
+
+    // Affichage du Catalogue
+    function renderServices(filter = "all") {
+      const grid = document.getElementById("servicesGrid");
+      const filtered = filter === "all"
+        ? servicesData
+        : servicesData.filter(s => s.category === filter);
+
+      grid.innerHTML = filtered.map(service => `
+        <div class="cyber-card rounded-2xl p-5 sm:p-6 flex flex-col justify-between transition">
+          <div>
+            <div class="flex items-center justify-between gap-2 mb-3">
+              <span class="px-2.5 py-1 rounded-lg bg-obsidian-950 border border-cyber-400/25 text-cyber-400 text-xs font-semibold">
+                ${service.category}
+              </span>
+              <span class="font-display text-lg font-extrabold text-cyber-400">${service.price} USD</span>
+            </div>
+            <h3 class="text-lg font-bold text-white mb-2">${service.title}</h3>
+            <p class="text-sm text-slate-300 leading-relaxed mb-3">${service.description}</p>
+            <p class="text-xs text-slate-400 mb-5">• ${service.unitNote}</p>
+          </div>
+          <button type="button" onclick="addToQuote('${service.id}')" class="w-full inline-flex items-center justify-center gap-2 bg-obsidian-800 hover:bg-cyber-400 text-cyber-400 hover:text-obsidian-950 font-bold text-sm py-3 px-4 rounded-xl border border-cyber-400/40 transition">
+            <span>+ Ajouter au devis</span>
+          </button>
+        </div>
+      `).join("");
+    }
+
+    // Gestion des filtres
+    document.querySelectorAll(".filter-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".filter-btn").forEach(b => {
+          b.classList.remove("bg-cyber-400", "text-obsidian-950");
+          b.classList.add("bg-obsidian-800", "text-slate-300", "border", "border-slate-700");
+        });
+        btn.classList.remove("bg-obsidian-800", "text-slate-300", "border", "border-slate-700");
+        btn.classList.add("bg-cyber-400", "text-obsidian-950");
+        renderServices(btn.dataset.filter);
+      });
+    });
+
+    // Affichage du Simulateur
+    function renderSimulator() {
+      const container = document.getElementById("simulatorItems");
+      container.innerHTML = servicesData.map(service => `
+        <div class="cyber-card rounded-2xl p-4 flex items-center justify-between gap-3">
+          <div>
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="font-bold text-sm sm:text-base text-white">${service.title}</span>
+              <span class="font-display text-xs font-bold text-cyber-400">${service.price} USD</span>
+            </div>
+            <p class="text-xs text-slate-400 mt-0.5">${service.shortNote}</p>
+          </div>
+          <div class="flex items-center gap-2.5 shrink-0">
+            <button type="button" onclick="updateQty('${service.id}', -1)" class="w-8 h-8 rounded-lg bg-obsidian-950 border border-slate-700 hover:border-cyber-400 text-slate-200 font-bold flex items-center justify-center transition">−</button>
+            <span id="qty-${service.id}" class="w-6 text-center font-bold text-sm text-white">${cart[service.id]}</span>
+            <button type="button" onclick="updateQty('${service.id}', 1)" class="w-8 h-8 rounded-lg bg-obsidian-950 border border-slate-700 hover:border-cyber-400 text-cyber-400 font-bold flex items-center justify-center transition">+</button>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function addToQuote(id) {
+      cart[id] += 1;
+      const service = servicesData.find(s => s.id === id);
+      updateQuoteUI();
+      showToast(`« ${service.title} » ajouté à votre devis.`);
+    }
+
+    function updateQty(id, delta) {
+      cart[id] = Math.max(0, cart[id] + delta);
+      updateQuoteUI();
+    }
+
+    function getQuoteDetails() {
+      const clientProfile = document.getElementById("simClientType").value;
+      const selected = servicesData.filter(s => cart[s.id] > 0);
+      let total = 0;
+      let totalCount = 0;
+
+      selected.forEach(s => {
+        total += s.price * cart[s.id];
+        totalCount += cart[s.id];
+      });
+
+      let text = `DEVIS ESTIMATIF — OBSIDIAN CODE (Matadi, Kongo Central)\n`;
+      text += `Profil client : ${clientProfile}\n`;
+      text += `Prestations sélectionnées :\n`;
+
+      if (selected.length === 0) {
+        text += `- Aucune prestation sélectionnée\n`;
+      } else {
+        selected.forEach(s => {
+          text += `- ${s.title} (Qté : ${cart[s.id]} x ${s.price} USD) = ${cart[s.id] * s.price} USD\n`;
+        });
+      }
+
+      text += `TOTAL ESTIMÉ : ${total} USD\n`;
+      text += `Conditions : devis valable 15 jours ; intervention après acceptation ; pièces, licences et hébergement séparés.`;
+
+      return { clientProfile, selected, total, totalCount, text };
+    }
+
+    function updateQuoteUI() {
+      const { clientProfile, selected, total, totalCount } = getQuoteDetails();
+
+      // Mise à jour des compteurs
+      servicesData.forEach(s => {
+        const el = document.getElementById(`qty-${s.id}`);
+        if (el) el.textContent = cart[s.id];
+      });
+
+      // Badge header
+      const badge = document.getElementById("headerCartBadge");
+      if (totalCount > 0) {
+        badge.textContent = totalCount;
+        badge.classList.remove("hidden");
+        badge.classList.add("inline-flex");
+      } else {
+        badge.classList.add("hidden");
+        badge.classList.remove("inline-flex");
+      }
+
+      document.getElementById("quoteClientLabel").textContent = clientProfile;
+      document.getElementById("quoteTotalAmount").textContent = `${total} USD`;
+
+      const listEl = document.getElementById("quoteSummaryList");
+      if (selected.length === 0) {
+        listEl.innerHTML = `<p class="text-sm text-slate-500 italic text-center py-6">Aucune prestation sélectionnée. Ajoutez un service ci-contre.</p>`;
+      } else {
+        listEl.innerHTML = selected.map(s => `
+          <div class="flex items-center justify-between text-sm border-b border-slate-800/80 pb-2">
+            <div>
+              <div class="font-semibold text-white">${s.title}</div>
+              <div class="text-xs text-slate-400">${cart[s.id]} × ${s.price} USD</div>
+            </div>
+            <div class="font-display font-bold text-cyber-400">${cart[s.id] * s.price} USD</div>
+          </div>
+        `).join("");
+      }
+    }
+
+    document.getElementById("simClientType").addEventListener("change", updateQuoteUI);
+
+    // Copier le devis
+    document.getElementById("copyQuoteBtn").addEventListener("click", async () => {
+      const { text } = getQuoteDetails();
+      try {
+        await navigator.clipboard.writeText(text);
+        showToast("Devis copié dans le presse-papiers !");
+      } catch (e) {
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+        showToast("Devis copié !");
+      }
+    });
+
+    // Transférer le devis vers la Fiche d'Intervention
+    document.getElementById("transferQuoteBtn").addEventListener("click", () => {
+      const { clientProfile, selected, text } = getQuoteDetails();
+      document.getElementById("clientType").value = clientProfile;
+
+      if (selected.length === 1) {
+        const selectEl = document.getElementById("serviceRequested");
+        const match = Array.from(selectEl.options).find(opt =>
+          opt.value.toLowerCase().includes(selected[0].title.toLowerCase().slice(0, 12))
+        );
+        if (match) selectEl.value = match.value;
+      } else if (selected.length > 1) {
+        document.getElementById("serviceRequested").value = "Devis personnalisé (plusieurs services)";
+      }
+
+      document.getElementById("projectDetails").value = text;
+      document.getElementById("contact").scrollIntoView({ behavior: "smooth" });
+      showToast("Votre devis a été pré-rempli dans la fiche d'intervention.");
+    });
+
+    // =========================================================
+    // CONSTRUCTION DES LIENS E-MAIL & WHATSAPP (SANS BUG)
+    // =========================================================
+    function buildSubmissionData(refCode) {
+      const type = document.getElementById("clientType").value;
+      const name = document.getElementById("clientName").value.trim();
+      const phone = document.getElementById("clientPhone").value.trim();
+      const email = document.getElementById("clientEmail").value.trim();
+      const service = document.getElementById("serviceRequested").value;
+      const details = document.getElementById("projectDetails").value.trim();
+
+      const subject = `[OBSIDIAN CODE] Fiche d'intervention ${refCode} - ${name}`;
+      const bodyLines = [
+        `Bonjour OBSIDIAN CODE,`,
+        ``,
+        `Nouvelle fiche d'intervention (${refCode}) :`,
+        `- Type de client : ${type}`,
+        `- Nom / Structure : ${name}`,
+        `- Téléphone / WhatsApp : ${phone}`,
+        `- E-mail client : ${email || "Non précisé"}`,
+        `- Service souhaité : ${service}`,
+        ``,
+        `Détails / Récapitulatif :`,
+        `${details}`
+      ];
+      const fullMessage = bodyLines.join("\n");
+
+      // Encodage propre pour Android / Gmail / Mailto
+      const mailtoUrl = `mailto:${OBSIDIAN_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(fullMessage)}`;
+      const whatsappUrl = `https://wa.me/${OBSIDIAN_WHATSAPP}?text=${encodeURIComponent(fullMessage)}`;
+
+      return { type, name, phone, service, mailtoUrl, whatsappUrl };
+    }
+
+    // Soumission du formulaire (E-mail + Ticket)
+    document.getElementById("interventionForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      const refCode = "OC-" + Math.floor(1000 + Math.random() * 9000);
+      const data = buildSubmissionData(refCode);
+
+      // Affichage du ticket de confirmation
+      document.getElementById("ticketRefBadge").textContent = `Référence : ${refCode}`;
+      document.getElementById("confirmationSummary").innerHTML = `
+        Référence : <strong class="text-cyber-400">${refCode}</strong> • Client : <strong class="text-white">${data.name} (${data.type})</strong>.<br>
+        Prestation : <strong class="text-cyber-400">${data.service}</strong>.<br>
+        Contact : <strong class="text-white">${data.phone}</strong>.<br>
+        Votre application E-mail va s'ouvrir pour finaliser l'envoi à OBSIDIAN CODE.
+      `;
+
+      const retryMail = document.getElementById("retryMailLink");
+      const retryWa = document.getElementById("retryWhatsappLink");
+      retryMail.href = data.mailtoUrl;
+      retryWa.href = data.whatsappUrl;
+
+      document.getElementById("interventionForm").classList.add("hidden");
+      document.getElementById("confirmationCard").classList.remove("hidden");
+      showToast("Demande d'intervention enregistrée !");
+
+      // Ouverture propre du client mail
+      setTimeout(() => {
+        window.location.href = data.mailtoUrl;
+      }, 350);
+    });
+
+    // Bouton direct WhatsApp depuis le formulaire
+    document.getElementById("directWhatsappBtn").addEventListener("click", () => {
+      const form = document.getElementById("interventionForm");
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+      const refCode = "OC-" + Math.floor(1000 + Math.random() * 9000);
+      const data = buildSubmissionData(refCode);
+      window.open(data.whatsappUrl, "_blank", "noopener,noreferrer");
+    });
+
+    // Bouton Nouvelle demande
+    document.getElementById("newRequestBtn").addEventListener("click", () => {
+      document.getElementById("interventionForm").reset();
+      document.getElementById("confirmationCard").classList.add("hidden");
+      document.getElementById("interventionForm").classList.remove("hidden");
+    });
+
+    // Initialisation
+    renderServices();
+    renderSimulator();
+    updateQuoteUI();
+    lucide.createIcons();
+  </script>
+</body>
+</html>
